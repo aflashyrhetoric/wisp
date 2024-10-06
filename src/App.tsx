@@ -4,10 +4,16 @@ import { convertFileSrc, invoke } from "@tauri-apps/api/core";
 import { decamelize } from "./Libs/api-helpers";
 import { DirEntryWithComputed } from "./types/fs-types";
 import {
+  extractRelativePath,
+  fetchFileMetadata,
   filterToVideoFiles,
+  getDocumentsPath,
   getFilename,
   getFileType,
   getPathOfFile,
+  getRelativePath,
+  pathIsInDocumentsFolder,
+  secondsToHms,
 } from "./utils/filetype-utilities";
 import { FolderOpenIcon, WaterDropIcon } from "./Libs/Icons";
 import { open } from "@tauri-apps/plugin-dialog";
@@ -16,6 +22,8 @@ import { useFilesStore } from "./Stores/useFilesStore";
 import { useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import * as path from "@tauri-apps/api/path";
+import Titlebar from "./Components/Titlebar";
+import VideoMetadataDisplay from "./Home/VideoMetadataDisplay";
 // import { generateVideoThumbnails, importFileandPreview } from "@/Libs/thumbnail-generator";
 
 function App() {
@@ -24,11 +32,14 @@ function App() {
 
   const {
     allRegisteredFiles,
-    hasRegisteredFiles,
-    registerFiles,
-    updateRevisedFilename,
+    clusters,
+    clusterDifferences,
     getRegisteredFile,
+    hasRegisteredFiles,
+    registerClusters,
+    registerFiles,
     resetRegisteredFiles,
+    updateRevisedFilename,
   } = useFilesStore();
 
   async function greet() {
@@ -42,9 +53,12 @@ function App() {
     for (const file of allRegisteredFiles()) {
       const registeredFile = getRegisteredFile(file.id);
       if (registeredFile && registeredFile.revisedFilename) {
-        directory = registeredFile.dirPath;
-        const oldName = registeredFile.filename + "." + registeredFile.fileType;
-        const newName = registeredFile.revisedFilename + "." + registeredFile.fileType;
+        if (directory === "") {
+          directory = registeredFile.dirPath;
+        }
+        const DOCUMENTS_DIR = await path.documentDir();
+        const oldName = `${DOCUMENTS_DIR}/${registeredFile.relativePath}${registeredFile.filename}.${registeredFile.fileType}`;
+        const newName = `${DOCUMENTS_DIR}/${registeredFile.relativePath}${registeredFile.revisedFilename}.${registeredFile.fileType}`;
         await rename(oldName, newName, {
           oldPathBaseDir: path.BaseDirectory.Document,
           newPathBaseDir: path.BaseDirectory.Document,
@@ -52,14 +66,7 @@ function App() {
       }
     }
 
-    if (directory !== "") {
-      loadFilesInDirectory(directory);
-    }
-
-    // [Error] Unhandled Promise Rejection: fs.rename not allowed. Permissions associated with this command: fs:allow-app-write, fs:allow-app-write-recursive, fs:allow-appcache-write, fs:allow-appcache-write-recursive, fs:allow-appconfig-write,...
-    // (anonymous function) (App.tsx:52)
-    // console.log({ allRegisteredFiles: decamelize(allRegisteredFiles()) });
-    // await invoke("rename_all_files", { allRegisteredFiles: decamelize(allRegisteredFiles()) });
+    loadFilesInDirectory(directory);
   }
 
   const showFileUploader = !hasRegisteredFiles();
@@ -73,103 +80,146 @@ function App() {
     // Read the contents of the directory
     const entries = await readDir(normalizedPath);
     const validVideoFiles = filterToVideoFiles(entries);
-    const videoFilesWithPath = validVideoFiles.map((file) => {
-      return {
-        ...file,
-        src: convertFileSrc(`${normalizedPath}/${file.name}`),
-        path: `${normalizedPath}/${file.name}`,
-        id: uuidv4(),
-        filename: getFilename(file.name),
-        fileType: getFileType(file.name),
-        revisedFilename: "",
-        dirPath: userProvidedPath,
-      };
-    });
+    const baseFolder = await path.documentDir();
+    const videoFilesWithPath = await Promise.all(
+      validVideoFiles.map(async (file) => {
+        return {
+          ...file,
+
+          path: `${normalizedPath}/${file.name}`,
+          id: uuidv4(),
+          src: convertFileSrc(`${normalizedPath}/${file.name}`),
+
+          filename: getFilename(file.name),
+          fileType: getFileType(file.name),
+
+          revisedFilename: "",
+
+          dirPath: userProvidedPath,
+          relativePath: extractRelativePath(`${normalizedPath}/${file.name}`, baseFolder) as string,
+          createdAt: await fetchFileMetadata(`${normalizedPath}/${file.name}`),
+        };
+      })
+    );
+
     registerFiles(videoFilesWithPath);
+
+    registerClusters(videoFilesWithPath);
   };
 
   return (
-    <div className="grid12 p-8 font-inter gap-3">
-      <header className={`cs-12 flex flex-col text-left mb-2`}>
-        <button
-          onClick={() => {
-            resetRegisteredFiles();
-          }}
-        >
-          <h1 className="text-xl font-light fic tracking-tight text-gray-600">
-            <WaterDropIcon className={`mr-1`} /> wisp
-          </h1>
-        </button>
-      </header>
-      <div className={`cs-12`}>
-        {showFileUploader && (
+    <div className={`overflow-y-scroll`}>
+      {/* <Titlebar /> */}
+      {/* <code className={`text-sm overflow-y-scroll`}>
+        <pre>{JSON.stringify(clusters, null, 2)}</pre>
+      </code> */}
+      <div className="grid12 p-12 pt-5 font-inter gap-3">
+        <header className={`bg-gray-800 cs-12 flex text-left mb-2 p-5 rounded-2xl`}>
           <button
-            className={`w-full h-[200px] border-2 border-dashed border-gray-400 flex items-center justify-center shadow-none rounded`}
-            onClick={async () => {
-              const userProvidedPath = await open({
-                directory: true,
-                multiple: false,
-              });
-
-              if (userProvidedPath) {
-                loadFilesInDirectory(userProvidedPath);
-              }
+            onClick={() => {
+              resetRegisteredFiles();
             }}
+            className={`hover:italic`}
           >
-            <span className={`text-gray-400 tracking-tight text-3xl fic`}>
-              <FolderOpenIcon className={`mr-2`} />
-              Open Folder
-            </span>
+            <h1 className="text-2xl font-light fic tracking-tight text-white">
+              <WaterDropIcon className={`mr-1`} />
+              <span className={`font-fredoka`}>wisp</span>
+            </h1>
           </button>
-        )}
-      </div>
-      <div className={`cs-6 grid12 gap-y-2`}>
-        {!showFileUploader && (
-          <div className={`cs-12 flex justify-end`}>
-            <Button onClick={renameAllFiles}>Rename</Button>
+        </header>
+        {showFileUploader && (
+          <div className={`cs-12`}>
+            <button
+              className={`w-full h-[200px] border-2 fc flex-col border-dashed border-gray-400 shadow-none rounded-xl`}
+              onClick={async () => {
+                const userProvidedPath = await open({
+                  directory: true,
+                  multiple: false,
+                });
+
+                if (userProvidedPath) {
+                  if (!pathIsInDocumentsFolder(userProvidedPath)) {
+                    return;
+                  }
+
+                  loadFilesInDirectory(userProvidedPath);
+                }
+              }}
+            >
+              <p className={`text-gray-400 tracking-tight text-3xl fic`}>
+                <FolderOpenIcon className={`mr-2`} />
+                Open Folder
+              </p>
+              <p className={`text-sm italic text-gray-400 mt-2 `}>Must be in ~/Documents</p>
+            </button>
           </div>
         )}
-        {!showFileUploader &&
-          allRegisteredFiles()
-            .sort((a, b) => a.filename.localeCompare(b.filename))
-            .map((fileInDir) => {
-              const updateFilename = (e: React.ChangeEvent<HTMLInputElement>) => {
-                updateRevisedFilename(fileInDir.id, e.currentTarget.value);
-              };
-
-              const registeredFile = getRegisteredFile(fileInDir.id);
-
+        <div className={`cs-6`}>
+          {!showFileUploader && (
+            <div className={`flex justify-end`}>
+              <Button onClick={renameAllFiles}>Rename</Button>
+            </div>
+          )}
+          {!showFileUploader &&
+            clusters.map((clusterOfFiles, clusterIndex) => {
               return (
-                <input
-                  type="text"
-                  key={`file-${fileInDir.name}`}
-                  className={`cs-12 py-1 px-2 bg-gray-50 hover:bg-gray-200 rounded placeholder:text-gray-500`}
-                  onMouseEnter={() => {
-                    setSelectedVideoFile(fileInDir);
-                  }}
-                  onFocus={() => {
-                    setSelectedVideoFile(fileInDir);
-                  }}
-                  onChange={updateFilename}
-                  placeholder={registeredFile?.filename}
-                  value={registeredFile?.revisedFilename}
-                />
+                <div key={`cluster-${clusterIndex}`}>
+                  <div className={`relative pl-3 space-y-2`}>
+                    <div className={`h-full w-1 rounded-full absolute left-0 bg-gray-400`} />
+
+                    {clusterOfFiles.map((fileInDir) => {
+                      const updateFilename = (e: React.ChangeEvent<HTMLInputElement>) => {
+                        updateRevisedFilename(fileInDir.id, e.currentTarget.value);
+                      };
+
+                      const registeredFile = getRegisteredFile(fileInDir.id);
+
+                      return (
+                        <input
+                          type="text"
+                          key={`file-${fileInDir.name}`}
+                          className={`cs-12 w-full h-[48px] p-4 hover:bg-gray-200 rounded-lg placeholder:text-gray-500`}
+                          onMouseEnter={() => {
+                            setSelectedVideoFile(fileInDir);
+                          }}
+                          onFocus={() => {
+                            setSelectedVideoFile(fileInDir);
+                          }}
+                          onChange={updateFilename}
+                          placeholder={registeredFile?.filename}
+                          value={registeredFile?.revisedFilename}
+                        />
+                      );
+                    })}
+                  </div>
+                  {clusterDifferences[clusterIndex] ? (
+                    <div
+                      className={`my-3 bg-gray-50 fc font-inter rounded text-xs text-gray-400 py-2 px-4`}
+                    >
+                      {secondsToHms(clusterDifferences[clusterIndex])}
+                    </div>
+                  ) : null}
+                </div>
               );
             })}
-      </div>
-      {!showFileUploader && (
-        <div className={`cs-6`}>
-          <video
-            src={selectedVideoFile?.src}
-            controls
-            autoPlay
-            className="max-w-full max-h-[80vh]"
-            muted
-          />
         </div>
-      )}
+        {!showFileUploader && (
+          <div className={`border border-gray-400 rounded-xl bg-white p-4 cs-6`}>
+            {/* <div className={`cs-12`}>
+              <code>
+                <pre>{JSON.stringify(selectedVideoFile, null, 2)}</pre>
+              </code>
+            </div> */}
+            <div className={`w-full gap-x-4 grid12`}>
+              {selectedVideoFile?.src && <VideoMetadataDisplay src={selectedVideoFile?.src} />}
+            </div>
+            <div className={`cs-12 fc`}>
+              <video src={selectedVideoFile?.src} controls autoPlay className="h-[400px]" muted />
+            </div>
+          </div>
+        )}
 
-      {/* <form
+        {/* <form
         className="row"
         onSubmit={(e) => {
           e.preventDefault();
@@ -185,6 +235,7 @@ function App() {
       </form>
 
       <p>{greetMsg}</p> */}
+      </div>
     </div>
   );
 }

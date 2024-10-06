@@ -7,4 +7,6 @@ export type DirEntryWithComputed = DirEntry & {
   filename: string;
   fileType: string;
   dirPath: string; // the directory that the user provided, where the file is located
+  relativePath: string; // relative to documents
+  createdAt: number;
 };
