@@ -1,0 +1,305 @@
+/* Put custom Tailwind @apply directives here */
+
+input,
+textarea {
+  --tw-ring-shadow: 0 0 #000 !important;
+}
+
+/* Note: this file is imported and used in `resources/css/app.css` */
+@layer components {
+  .fic {
+    @apply flex items-center;
+  }
+
+  .ific {
+    @apply inline-flex items-center;
+  }
+
+  /* Flex center all*/
+  .fc {
+    @apply flex items-center justify-center;
+  }
+
+  .ic {
+    @apply items-center;
+  }
+
+  .jb {
+    @apply justify-between;
+  }
+
+  .tac {
+    @apply text-center;
+  }
+
+  .centered {
+    @apply flex items-center justify-center;
+  }
+
+  .grid12 {
+    @apply grid grid-cols-12;
+  }
+
+  .cs-1 {
+    @apply col-span-1;
+  }
+
+  .cs-2 {
+    @apply col-span-2;
+  }
+
+  .cs-3 {
+    @apply col-span-3;
+  }
+
+  .cs-4 {
+    @apply col-span-4;
+  }
+
+  .cs-5 {
+    @apply col-span-5;
+  }
+
+  .cs-6 {
+    @apply col-span-6;
+  }
+
+  .cs-7 {
+    @apply col-span-7;
+  }
+
+  .cs-8 {
+    @apply col-span-8;
+  }
+
+  .cs-9 {
+    @apply col-span-9;
+  }
+
+  .cs-10 {
+    @apply col-span-10;
+  }
+
+  .cs-11 {
+    @apply col-span-11;
+  }
+
+  .cs-12 {
+    @apply col-span-12;
+  }
+
+  .csr-12-6 {
+    @apply col-span-12 md:col-span-6;
+  }
+
+  .csr-12-6-4 {
+    @apply col-span-12 md:col-span-6 lg:col-span-4;
+  }
+
+  .clip-gradient-text {
+    background-image: linear-gradient(137.56deg, rgba(137, 233, 255, 0.86) 10%, #9c4dbe 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .clip-gradient-text-highlight {
+    /*background-image: linear-gradient(135deg, hsla(25, 100%, 91%, 1) 0%, hsla(0, 100%, 91%, 1) 100%);*/
+    background-image: linear-gradient(135deg, hsla(25, 100%, 87%, 1) 0%, hsla(0, 80%, 85%, 1) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .text-main {
+    @apply text-gray-800;
+  }
+
+  .gradient-multi {
+    background-color: hsla(0, 100%, 50%, 1);
+    background-image: radial-gradient(at 40% 20%, hsla(28, 100%, 74%, 1) 0px, transparent 50%),
+      radial-gradient(at 0% 50%, hsla(355, 100%, 93%, 1) 0px, transparent 50%),
+      radial-gradient(at 80% 50%, hsla(340, 100%, 76%, 1) 0px, transparent 50%),
+      radial-gradient(at 0% 100%, hsla(22, 100%, 77%, 1) 0px, transparent 50%),
+      radial-gradient(at 80% 100%, hsla(240, 100%, 76%, 1) 0px, transparent 50%),
+      radial-gradient(at 80% 0%, hsla(189, 100%, 56%, 1) 0px, transparent 50%),
+      radial-gradient(at 0% 0%, hsla(343, 100%, 76%, 1) 0px, transparent 50%);
+  }
+
+  .gradient-gray {
+    @apply bg-gradient-to-br from-white to-gray-300;
+  }
+
+  .gradient-red {
+    @apply bg-gradient-to-br from-red-600 to-red-900;
+  }
+
+  .gradient-blue {
+    @apply bg-gradient-to-br from-blue-400 to-blue-600;
+  }
+
+  .gradient-green {
+    @apply bg-gradient-to-br from-green-600 to-green-800;
+  }
+
+  .gradient-orange {
+    @apply bg-gradient-to-br from-orange-800 to-orange-900;
+  }
+
+  .gradient-purple {
+    @apply bg-gradient-to-br from-purple-500 to-purple-800;
+  }
+
+  .gradient-purple-dark {
+    @apply bg-gradient-to-br from-purple-500 to-purple-700;
+  }
+
+  .gradient-grayscale {
+    @apply bg-gradient-to-br from-white to-gray-100;
+  }
+
+  .gradient-subtle {
+    @apply bg-gradient-to-br from-cyan-200/80 to-purple-200/60;
+  }
+
+  .gradient-orange-yellow {
+    @apply bg-gradient-to-br from-orange-100/90 to-purple-200/80;
+  }
+
+  .gradient-ai {
+    @apply bg-gradient-to-br from-purple-600/80 to-purple-800/80;
+  }
+
+  .gradient-dark {
+    @apply bg-gradient-to-br from-gray-700 to-gray-800;
+  }
+
+  .gradient-highlight {
+    @apply bg-gradient-to-br from-fuchsia-100 to-orange-200;
+  }
+
+  .gradient-highlight-lightest {
+    @apply bg-gradient-to-br from-fuchsia-50 to-orange-100;
+  }
+
+  .gradient-highlight-light {
+    /*background: linear-gradient(135deg, hsla(25, 100%, 91%, 1) 0%, hsla(0, 100%, 91%, 1) 100%);*/
+    /*@apply bg-gradient-to-br from-amber-100 to-fuchsia-200;*/
+    @apply bg-gradient-to-br from-amber-100 to-rose-100;
+  }
+
+  .linkify {
+    @apply text-blue-500 hover:text-blue-600 underline;
+  }
+
+  .bg-office-gray {
+    --tw-bg-opacity: 1;
+    background-color: #e3e0dc;
+  }
+
+  /* Debugging class */
+  .bgb {
+    @apply bg-blue-50;
+  }
+  .bg-main {
+    @apply bg-white;
+  }
+
+  .bg-main-dark {
+    @apply bg-gray-900;
+  }
+
+  .font-figtree {
+    font-family: "Figtree", sans-serif;
+  }
+
+  .font-inter {
+    font-family: "Inter", sans-serif;
+  }
+
+  .font-lexend {
+    font-family: "Lexend", sans-serif;
+  }
+
+  /* .font-renogare {
+        font-family: "Renogare", sans-serif;
+    } */
+
+  /* .font-geist {
+        font-family: "GeistSans", sans-serif;
+    } */
+
+  .font-fredoka {
+    font-family: "Fredoka", sans-serif;
+  }
+
+  .headingify {
+    @apply text-sm font-bold uppercase;
+  }
+
+  .shadow-normal {
+    @apply shadow-md shadow-gray-300 border border-gray-200;
+  }
+
+  .border-normal {
+    @apply border-2 border-gray-700;
+  }
+
+  /* Transitions */
+  /*Transition for "height"*/
+  .transition-height {
+    @apply transition-all duration-150 ease-in-out;
+  }
+
+  .ws-font-dongle {
+    font-family: "Dongle", sans-serif;
+  }
+
+  .ws-theme-standard {
+    font-family: "Hammersmith One", sans-serif;
+  }
+
+  /*WORKSHEETS THEMES*/
+  /*.ws-theme-bold {*/
+  /*    font-family: "Bungee", display, sans-serif !important;*/
+  /*}*/
+  .ws-theme-playful {
+    font-family: "Chelsea Market", display, sans-serif !important;
+    font-weight: 500;
+  }
+
+  .text-shadow-light {
+    text-shadow: 0 0 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .text-shadow-heavy {
+    text-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
+  }
+
+  /*Apply this class to a div that is full height, and positioned absolutely to the top of a card-like item. You'll get a nice fade down that provides contrast for white text*/
+  .translucent-linear-radient-down-grayscale {
+    background-image: linear-gradient(180deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.05) 50%);
+  }
+
+  /* |-----------------------------
+     * | Animation Declarations
+     * |-----------------------------
+     */
+  @keyframes bob {
+    0%,
+    100% {
+      /* A subtle gentle bobbing animation */
+      animation-timing-function: ease-in-out;
+      transform: translateY(0rem);
+    }
+    50% {
+      transform: translateY(-0.5rem);
+      animation-timing-function: ease-in-out;
+    }
+  }
+  /* |-----------------------------
+     * | Animation Classes
+     * |-----------------------------
+     */
+  .animate-bob {
+    animation: bob 2.4s infinite;
+  }
+}
