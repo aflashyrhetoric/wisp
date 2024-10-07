@@ -25,8 +25,22 @@ interface Props {
 }
 
 const AddCaptions: React.FC<Props> = ({ goHome, className = "" }: Props) => {
+  const {
+    allRegisteredFiles,
+    clusters,
+    clusterDifferences,
+    getRegisteredFile,
+    hasRegisteredFiles,
+    registerClusters,
+    registerFiles,
+    resetRegisteredFiles,
+    updateRevisedFilename,
+  } = useFilesStore();
   return (
     <div className="cs-12 grid12 pt-5 font-inter gap-3">
+      <code>
+        <pre>{JSON.stringify(allRegisteredFiles(), null, 2)}</pre>
+      </code>
       <div className="cs-12 py-4">
         <p className="font-bold tracking-tight text-2xl mt-4">
           <button
