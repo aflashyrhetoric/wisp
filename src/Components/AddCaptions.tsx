@@ -1,23 +1,12 @@
+import React from "react";
 import { Button } from "@/ComponentsShad/Button";
-import { v4 as uuidv4 } from "uuid";
-import { open } from "@tauri-apps/plugin-dialog";
-import * as path from "@tauri-apps/api/path";
-import VideoMetadataDisplay from "@/Home/VideoMetadataDisplay";
-import { CaretRightIcon, FolderOpenIcon, WaterDropIcon } from "@/Libs/Icons";
-import {
-  extractRelativePath,
-  fetchFileMetadata,
-  filterToVideoFiles,
-  getFilename,
-  getFileType,
-  pathIsInDocumentsFolder,
-  secondsToHms,
-} from "@/utils/filetype-utilities";
-import { convertFileSrc } from "@tauri-apps/api/core";
-import React, { useState } from "react";
+import { useCaptionConfig } from "@/Stores/useCaptionConfig";
+import { CaretRightIcon, WaterDropIcon } from "@/Libs/Icons";
 import { useFilesStore } from "@/Stores/useFilesStore";
-import { readDir, rename } from "@tauri-apps/plugin-fs";
-import { DirEntryWithComputed } from "@/types/fs-types";
+import { VideoWrapper } from "@/Libs/VideoWrapper";
+import { UploadFiles } from "./UploadFiles";
+// import { readDir, rename } from "@tauri-apps/plugin-fs";
+// import { DirEntryWithComputed } from "@/types/fs-types";
 
 interface Props {
   className?: string;
@@ -25,22 +14,16 @@ interface Props {
 }
 
 const AddCaptions: React.FC<Props> = ({ goHome, className = "" }: Props) => {
-  const {
-    allRegisteredFiles,
-    clusters,
-    clusterDifferences,
-    getRegisteredFile,
-    hasRegisteredFiles,
-    registerClusters,
-    registerFiles,
-    resetRegisteredFiles,
-    updateRevisedFilename,
-  } = useFilesStore();
+  const { allRegisteredFiles, hasRegisteredFiles, loadFilesInDirectory } =
+    useFilesStore();
+
+  const { selectedVideo, hasSelectedVideo, setSelectedVideo } =
+    useCaptionConfig();
+
+  const showFileUploader = !hasRegisteredFiles();
+
   return (
     <div className="cs-12 grid12 pt-5 font-inter gap-3">
-      <code>
-        <pre>{JSON.stringify(allRegisteredFiles(), null, 2)}</pre>
-      </code>
       <div className="cs-12 py-4">
         <p className="font-bold tracking-tight text-2xl mt-4">
           <button
@@ -57,7 +40,56 @@ const AddCaptions: React.FC<Props> = ({ goHome, className = "" }: Props) => {
           Add Captions
         </p>
       </div>
-      poop
+      {showFileUploader && <UploadFiles />}
+      {hasSelectedVideo() && selectedVideo?.path && (
+        <div className="cs-12 grid12">
+          <div className="cs-6">
+            <VideoWrapper src={selectedVideo.src} />
+          </div>
+          <div className="cs-6 p-4">poop</div>
+          {/* <code className="cs-6">
+            <pre>{JSON.stringify(selectedVideo, null, 2)}</pre>
+          </code> */}
+        </div>
+      )}
+      {!hasSelectedVideo() &&
+        allRegisteredFiles().map((file) => {
+          return (
+            <div
+              key={file.id}
+              className={`cs-12 flex items-center justify-between border-b border-gray-200 py-2`}
+            >
+              <div className={`flex items-center`}>
+                <WaterDropIcon className={`mr-2`} />
+                <p className={`fic`}>{file.name}</p>
+              </div>
+              <div className={`flex items-center`}>
+                <Button
+                  onClick={() => {
+                    setSelectedVideo(file);
+                  }}
+                  className={`mr-2`}
+                >
+                  Select
+                </Button>
+                <Button
+                  onClick={() => {
+                    // const newFileName = `${file.name.replace(
+                    //   ".mp4",
+                    //   ""
+                    // )}-captions.mp4`;
+                    // rename({
+                    //   oldPath: file.path,
+                    //   newPath: path.join(file.dir, newFileName),
+                    // });
+                  }}
+                >
+                  Add Captions
+                </Button>
+              </div>
+            </div>
+          );
+        })}
     </div>
   );
 };

@@ -8,13 +8,16 @@ import { useFilesStore } from "./Stores/useFilesStore";
 import { WaterDropIcon } from "./Libs/Icons";
 import ChatIllustrationGraphic from "./Illustrations/ChatIllustrationGraphic";
 import AddCaptions from "./Components/AddCaptions";
+import { useCaptionConfig } from "./Stores/useCaptionConfig";
 
 function App() {
   const { resetRegisteredFiles } = useFilesStore();
+  const { resetSelectedVideo } = useCaptionConfig();
   const [view, setView] = useState<AppView>(AppView.Default);
 
   const goHome = () => {
     setView(AppView.Default);
+    resetSelectedVideo();
   };
 
   return (

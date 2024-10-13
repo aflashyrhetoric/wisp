@@ -35,6 +35,7 @@ const FileRenamer: React.FC<Props> = ({ goHome, className = "" }: Props) => {
     registerFiles,
     resetRegisteredFiles,
     updateRevisedFilename,
+    loadFilesInDirectory,
   } = useFilesStore();
 
   async function renameAllFiles() {
@@ -64,42 +65,42 @@ const FileRenamer: React.FC<Props> = ({ goHome, className = "" }: Props) => {
   const [selectedVideoFile, setSelectedVideoFile] =
     useState<DirEntryWithComputed | null>(null);
 
-  const loadFilesInDirectory = async (userProvidedPath: string) => {
-    // Optionally normalize the path to remove any trailing slashes, etc.
-    const normalizedPath = await path.normalize(userProvidedPath);
+  // const loadFilesInDirectory = async (userProvidedPath: string) => {
+  //   // Optionally normalize the path to remove any trailing slashes, etc.
+  //   const normalizedPath = await path.normalize(userProvidedPath);
 
-    // Read the contents of the directory
-    const entries = await readDir(normalizedPath);
-    const validVideoFiles = filterToVideoFiles(entries);
-    const baseFolder = await path.documentDir();
-    const videoFilesWithPath = await Promise.all(
-      validVideoFiles.map(async (file) => {
-        return {
-          ...file,
+  //   // Read the contents of the directory
+  //   const entries = await readDir(normalizedPath);
+  //   const validVideoFiles = filterToVideoFiles(entries);
+  //   const baseFolder = await path.documentDir();
+  //   const videoFilesWithPath = await Promise.all(
+  //     validVideoFiles.map(async (file) => {
+  //       return {
+  //         ...file,
 
-          path: `${normalizedPath}/${file.name}`,
-          id: uuidv4(),
-          src: convertFileSrc(`${normalizedPath}/${file.name}`),
+  //         path: `${normalizedPath}/${file.name}`,
+  //         id: uuidv4(),
+  //         src: convertFileSrc(`${normalizedPath}/${file.name}`),
 
-          filename: getFilename(file.name),
-          fileType: getFileType(file.name),
+  //         filename: getFilename(file.name),
+  //         fileType: getFileType(file.name),
 
-          revisedFilename: "",
+  //         revisedFilename: "",
 
-          dirPath: userProvidedPath,
-          relativePath: extractRelativePath(
-            `${normalizedPath}/${file.name}`,
-            baseFolder,
-          ) as string,
-          createdAt: await fetchFileMetadata(`${normalizedPath}/${file.name}`),
-        };
-      }),
-    );
+  //         dirPath: userProvidedPath,
+  //         relativePath: extractRelativePath(
+  //           `${normalizedPath}/${file.name}`,
+  //           baseFolder,
+  //         ) as string,
+  //         createdAt: await fetchFileMetadata(`${normalizedPath}/${file.name}`),
+  //       };
+  //     }),
+  //   );
 
-    registerFiles(videoFilesWithPath);
+  //   registerFiles(videoFilesWithPath);
 
-    registerClusters(videoFilesWithPath);
-  };
+  //   registerClusters(videoFilesWithPath);
+  // };
 
   return (
     <div className="cs-12 grid12 pt-5 font-inter gap-3">

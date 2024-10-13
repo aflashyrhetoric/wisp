@@ -30,8 +30,9 @@ pub fn get_file_metadata(file_path: String) -> Result<String, String> {
             if let Ok(created) = meta.created() {
                 // Convert SystemTime to a Unix timestamp
                 if let Ok(duration_since_epoch) = created.duration_since(UNIX_EPOCH) {
+                    // Get TIME VALUE in SECONDS (aka tv_sec)
                     let tv_sec = duration_since_epoch.as_secs(); // Get the seconds since epoch
-                    println!("tv_sec: {}", tv_sec);
+                    // println!("tv_sec: {}", tv_sec);
                     Ok(format!("{}", tv_sec)) // Return the tv_sec value as a string
                 } else {
                     Err("Could not calculate duration since UNIX_EPOCH".into())
