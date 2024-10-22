@@ -1,26 +1,40 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { Command } from "@tauri-apps/plugin-shell";
+
+import { invoke } from "@tauri-apps/api/core";
 import { Button } from "@/ComponentsShad/Button";
 import { useCaptionConfig } from "@/Stores/useCaptionConfig";
 import { CaretRightIcon, WaterDropIcon } from "@/Libs/Icons";
 import { useFilesStore } from "@/Stores/useFilesStore";
 import { VideoWrapper } from "@/Libs/VideoWrapper";
 import { UploadFiles } from "./UploadFiles";
-// import { readDir, rename } from "@tauri-apps/plugin-fs";
-// import { DirEntryWithComputed } from "@/types/fs-types";
+import { escapeFilePath } from "@/utils/filetype-utilities";
+
+// Import BaseDirectory
+import { tempDir } from "@tauri-apps/api/path";
 
 interface Props {
-  className?: string;
   goHome?: Function;
 }
 
-const AddCaptions: React.FC<Props> = ({ goHome, className = "" }: Props) => {
-  const { allRegisteredFiles, hasRegisteredFiles, loadFilesInDirectory } =
-    useFilesStore();
+const AddCaptions: React.FC<Props> = ({ goHome = () => {} }: Props) => {
+  const { allRegisteredFiles, hasRegisteredFiles } = useFilesStore();
 
-  const { selectedVideo, hasSelectedVideo, setSelectedVideo } =
-    useCaptionConfig();
+  const { selectedVideo, hasSelectedVideo, setSelectedVideo } = useCaptionConfig();
 
   const showFileUploader = !hasRegisteredFiles();
+
+  const [tempDirPath, setTempDirPath] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function getTempDir() {
+      const t = await tempDir();
+
+      setTempDirPath(t);
+    }
+
+    getTempDir();
+  }, []);
 
   return (
     <div className="cs-12 grid12 pt-5 font-inter gap-3">
@@ -46,10 +60,37 @@ const AddCaptions: React.FC<Props> = ({ goHome, className = "" }: Props) => {
           <div className="cs-6">
             <VideoWrapper src={selectedVideo.src} />
           </div>
-          <div className="cs-6 p-4">poop</div>
-          {/* <code className="cs-6">
-            <pre>{JSON.stringify(selectedVideo, null, 2)}</pre>
-          </code> */}
+          <div className="cs-6 px-4">
+            {/* <code>
+              <pre>{JSON.stringify(tempDirPath, null, 2)}</pre>
+            </code> */}
+            <button
+              onClick={async () => {
+                await Command.create("run-ffmpeg", [
+                  "-i",
+                  escapeFilePath(selectedVideo.path),
+                  "-q:a",
+                  "0",
+                  "-map",
+                  "a",
+                  `${tempDirPath}/audio.mp3`,
+                ]).execute();
+
+                // console.log(result);
+                // console.log(`${tempDirPath}/audio.mp3`);
+
+                // const lsResult = await Command.create("run-ls").execute();
+                // console.log(lsResult);
+
+                // const pwdResult = await Command.create("run-pwd").execute();
+
+                // console.log(pwdResult);
+              }}
+              className={`bg-blue-500 hover:bg-blue-700 transition-all text-white p-2 rounded-md`}
+            >
+              Fetch Captions
+            </button>
+          </div>
         </div>
       )}
       {!hasSelectedVideo() &&

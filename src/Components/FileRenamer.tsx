@@ -18,6 +18,7 @@ import React, { useState } from "react";
 import { useFilesStore } from "@/Stores/useFilesStore";
 import { readDir, rename } from "@tauri-apps/plugin-fs";
 import { DirEntryWithComputed } from "@/types/fs-types";
+import { UploadFiles } from "./UploadFiles";
 
 interface Props {
   className?: string;
@@ -121,35 +122,7 @@ const FileRenamer: React.FC<Props> = ({ goHome, className = "" }: Props) => {
         </p>
       </div>
 
-      {showFileUploader && (
-        <div className={`cs-12`}>
-          <button
-            className={`w-full h-[200px] border-2 fc flex-col border-dashed border-gray-400 shadow-none rounded-xl`}
-            onClick={async () => {
-              const userProvidedPath = await open({
-                directory: true,
-                multiple: false,
-              });
-
-              if (userProvidedPath) {
-                if (!pathIsInDocumentsFolder(userProvidedPath)) {
-                  return;
-                }
-
-                loadFilesInDirectory(userProvidedPath);
-              }
-            }}
-          >
-            <p className={`text-gray-400 tracking-tight text-3xl fic`}>
-              <FolderOpenIcon className={`mr-2`} />
-              Open Folder
-            </p>
-            <p className={`text-sm italic text-gray-400 mt-2 `}>
-              Must be in ~/Documents
-            </p>
-          </button>
-        </div>
-      )}
+      {showFileUploader && <UploadFiles />}
       <div className={`cs-6`}>
         {!showFileUploader && (
           <div className={`flex justify-end`}>

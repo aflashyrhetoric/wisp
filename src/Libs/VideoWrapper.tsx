@@ -8,11 +8,11 @@ export const VideoWrapper = ({ src }: { src: string }) => {
   const playerRef = useRef(null);
 
   const videoJsOptions = {
-    autoplay: true,
+    autoplay: false,
     controls: true,
     responsive: false,
     fluid: true,
-    loop: true,
+    loop: false,
     sources: [
       {
         src,

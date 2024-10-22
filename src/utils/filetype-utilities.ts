@@ -1,7 +1,7 @@
 import * as path from "@tauri-apps/api/path";
 import { DirEntryWithComputed } from "@/types/fs-types";
 import { DirEntry } from "@tauri-apps/plugin-fs";
-import { convertFileSrc, invoke } from "@tauri-apps/api/core";
+import { invoke } from "@tauri-apps/api/core";
 import { DirEntryForm } from "@/Stores/useFilesStore";
 
 export function pathIsInDocumentsFolder(path: string): boolean {
@@ -52,7 +52,9 @@ export function getFileType(fileName: string): string {
   return parts[parts.length - 1];
 }
 
-export function filterToVideoFiles(files: DirEntry[] | DirEntryWithComputed[]): DirEntry[] {
+export function filterToVideoFiles(
+  files: DirEntry[] | DirEntryWithComputed[],
+): DirEntry[] {
   const videoFiletypes = ["mp4", "mov", "mkv", "avi", "mov", "webm", "flv"];
 
   return files.filter((file) => {
@@ -110,17 +112,22 @@ export function getVideoMetadata(src: string): Promise<VideoMetadata> {
   });
 }
 
-export async function fetchFileMetadata(filePath: string): Promise<number | undefined> {
+export async function fetchFileMetadata(
+  filePath: string,
+): Promise<number | undefined> {
   try {
     const createdAt = await invoke("get_file_metadata", { filePath });
-    console.log("Created At: ", createdAt);
+    // console.log("Created At: ", createdAt);
     return parseInt(createdAt as string);
   } catch (error) {
     console.error("Error fetching metadata:", error);
   }
 }
 
-export function calculateDynamicThreshold(timestamps: number[], scaleFactor = 2) {
+export function calculateDynamicThreshold(
+  timestamps: number[],
+  scaleFactor = 2,
+) {
   if (timestamps.length < 2) return 0; // No threshold for one or zero timestamps
 
   timestamps.sort((a, b) => a - b); // Sort timestamps in ascending order
@@ -130,11 +137,15 @@ export function calculateDynamicThreshold(timestamps: number[], scaleFactor = 2)
     differences.push(timestamps[i] - timestamps[i - 1]);
   }
 
-  const averageDifference = differences.reduce((sum, diff) => sum + diff, 0) / differences.length;
+  const averageDifference =
+    differences.reduce((sum, diff) => sum + diff, 0) / differences.length;
   return averageDifference * scaleFactor; // Return dynamic threshold based on average difference
 }
 
-export function clusterTimestamps(videoFilesWithPath: DirEntryForm[], threshold: number) {
+export function clusterTimestamps(
+  videoFilesWithPath: DirEntryForm[],
+  threshold: number,
+) {
   if (videoFilesWithPath.length === 0) return [];
 
   videoFilesWithPath.sort((a, b) => a.createdAt - b.createdAt); // Sort timestamps in ascending order
@@ -142,7 +153,8 @@ export function clusterTimestamps(videoFilesWithPath: DirEntryForm[], threshold:
   let currentCluster = [videoFilesWithPath[0]];
 
   for (let i = 1; i < videoFilesWithPath.length; i++) {
-    const timeDiff = videoFilesWithPath[i].createdAt - videoFilesWithPath[i - 1].createdAt;
+    const timeDiff =
+      videoFilesWithPath[i].createdAt - videoFilesWithPath[i - 1].createdAt;
 
     if (timeDiff <= threshold) {
       // Add to the current cluster if within the threshold
@@ -178,4 +190,8 @@ export function secondsToHms(signedSeconds: number) {
   const mDisplay = m > 0 ? m + (m === 1 ? " minute, " : " minutes, ") : "";
   const sDisplay = s > 0 ? s + (s === 1 ? " second" : " seconds") : "";
   return hDisplay + mDisplay + sDisplay;
+}
+
+export function escapeFilePath(filePath: string): string {
+  return filePath.replace(/([`"$\\])/g, "\\$1");
 }
