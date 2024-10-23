@@ -1,61 +1,9 @@
 use async_openai::{
-    types::{AudioResponseFormat, CreateTranscriptionRequestArgs, TimestampGranularity},
+    types::{AudioResponseFormat, CreateTranscriptionRequestArgs},
     Client,
 };
 use serde::Serialize;
-use std::error::Error;
 use std::fmt;
-
-// #[tokio::main]
-// async fn main() -> Result<(), Box<dyn Error>> {
-//     // transcribe_json().await?;
-//     // transcribe_verbose_json().await?;
-//     // transcribe_vtt().await?;
-//     Ok(())
-// }
-
-// async fn transcribe_json() -> Result<(), Box<dyn Error>> {
-//     let client = Client::new();
-//     // Credits and Source for audio: https://www.youtube.com/watch?v=oQnDVqGIv4s
-//     let request = CreateTranscriptionRequestArgs::default()
-//         .file(
-//             "./audio/A Message From Sir David Attenborough A Perfect Planet BBC Earth_320kbps.mp3",
-//         )
-//         .model("whisper-1")
-//         .response_format(AudioResponseFormat::Json)
-//         .build()?;
-
-//     let response = client.audio().transcribe(request).await?;
-//     println!("{}", response.text);
-//     Ok(())
-// }
-
-// async fn transcribe_verbose_json() -> Result<(), Box<dyn Error>> {
-//     let client = Client::new();
-//     let request = CreateTranscriptionRequestArgs::default()
-//         .file(
-//             "./audio/A Message From Sir David Attenborough A Perfect Planet BBC Earth_320kbps.mp3",
-//         )
-//         .model("whisper-1")
-//         .response_format(AudioResponseFormat::VerboseJson)
-//         .timestamp_granularities(vec![
-//             TimestampGranularity::Word,
-//             TimestampGranularity::Segment,
-//         ])
-//         .build()?;
-
-//     let response = client.audio().transcribe_verbose_json(request).await?;
-
-//     println!("{}", response.text);
-//     if let Some(words) = &response.words {
-//         println!("- {} words", words.len());
-//     }
-//     if let Some(segments) = &response.segments {
-//         println!("- {} segments", segments.len());
-//     }
-
-//     Ok(())
-// }
 
 // Define a custom error struct that implements Serialize and Debug
 #[derive(Serialize, Debug)]
